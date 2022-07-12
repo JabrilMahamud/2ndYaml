@@ -10,30 +10,30 @@ Resources:
         Version: '2012-10-17'
         Statement:
         - Sid: CWAccess
-        Effect: Allow
-        Action:
-        - logs:CreateLogStream
-        - logs:PutLogEvents
-        Resource:
-        - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${LambdaFunctionName}:*
+          Effect: Allow
+          Action:
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Resources:
+            - !Sub '*'
         - Sid: DynamDBAccess
           Effect: Allow
           Action:
-          - dynamodb:scan
-          - dynamodb:list
+            - dynamodb:scan
+            - dynamodb:list
           Resource: 
-        - !Sub arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/MetadataJson
+            - !Sub arn:aws:dynamodb:eu-west-2:251045990954:table/MetadataJson
         - Sid: S3Access
           Effect: Allow
           Action:
-          - s3:ListAllMyBucket
-          - s3:ListBucket
-          - s3:PutObject
-          - s3:PutObjectAcl
-          - s3:GetBucketLocation
+            - s3:ListAllMyBucket
+            - s3:ListBucket
+            - s3:PutObject
+            - s3:PutObjectAcl
+            - s3:GetBucketLocation
           Resource: 
-        - !Sub arn:${AWS::Partition}:s3:::dbmetadata
-        - !Sub arn:${AWS::Partition}:s3:::dbmetadata/*
+          - !Sub arn:s3:::dbmetadata
+          - !Sub arn:s3:::dbmetadata/*
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -48,7 +48,7 @@ Resources:
           from datetime import date, datetime
           import csv
           def lambda_handler(event, context):
-              dynamodb = boto3.resource("dynamodb", region_name='eu-west-2')
+              dynamodb = boto3.resource("dynamodb", Eu-west2_name='eu-west-2')
               table = dynamodb.Table('MetadataJson')
               
               tableDict = table.scan(
@@ -77,7 +77,7 @@ Resources:
                   filewriter.writerows(tableData)
               
               
-              S3_Client = boto3.client("s3", region_name='eu-west-2')
+              S3_Client = boto3.client("s3", Eu-west2_name='eu-west-2')
               allBuckets = S3_Client.list_buckets().get('Buckets')
               foundBucket = False
               i = 0
