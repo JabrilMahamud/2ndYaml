@@ -2,6 +2,13 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: >
   This CloudFormation template creates simple Lambda functions,
   which prints CloudFormation resource Arn from the stack.  
+
+
+Parameters:
+  LambdaFunctionName:
+    Type: String
+    Default: Mytestlambda
+
 Resources:
   LambdaFunctionRole:
     Type: AWS::IAM::Role
@@ -9,31 +16,44 @@ Resources:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-        - Sid: CWAccess
-          Effect: Allow
-          Action:
-            - logs:CreateLogStream
-            - logs:PutLogEvents
-          Resources:
-            - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${LambdaFunctionName}:*
-        - Sid: DynamDBAccess
-          Effect: Allow
-          Action:
-            - dynamodb:scan
-            - dynamodb:list
-          Resource: 
-            - !Sub arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/MetadataJson
-        - Sid: S3Access
-          Effect: Allow
-          Action:
-            - s3:ListAllMyBucket
-            - s3:ListBucket
-            - s3:PutObject
-            - s3:PutObjectAcl
-            - s3:GetBucketLocation
-          Resource: 
-          - !Sub arn:${AWS::Partition}:s3:::dbmetadata
-          - !Sub arn:${AWS::Partition}:s3:::dbmetadata/*
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: LambdaFunctionPolicy
+          PolicyDocument:       
+            Version: '2012-10-17'
+            Statement:
+            - Sid: CWAccess
+              Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${LambdaFunctionName}:*
+            - Sid: DynamDBAccess
+              Effect: Allow
+              Action:
+                - dynamodb:scan
+                - dynamodb:list
+              Resource: 
+                - !Sub arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/MetadataJson
+            - Sid: S3Access
+              Effect: Allow
+              Action:
+                - s3:ListAllMyBucket
+                - s3:ListBucket
+                - s3:PutObject
+                - s3:PutObjectAcl
+                - s3:GetBucketLocation
+              Resource: 
+              - !Sub arn:${AWS::Partition}:s3:::dbmetadata
+              - !Sub arn:${AWS::Partition}:s3:::dbmetadata/*
+
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -41,6 +61,7 @@ Resources:
       Timeout: 60
       Handler: index.lambda_handler
       Role: !GetAtt LambdaFunctionRole.Arn
+      FunctionName: !Ref LambdaFunctionName
       Code:
         ZipFile: |
           import logging
@@ -48,7 +69,8 @@ Resources:
           from datetime import date, datetime
           import csv
           def lambda_handler(event, context):
-              dynamodb = boto3.resource("dynamodb", Eu-west2_name='eu-west-2')
+              dynamodb = boto3.resource("dynamodb", 
+                        Eu-west2_name='eu-west-2')
               table = dynamodb.Table('MetadataJson')
               
               tableDict = table.scan(
@@ -73,7 +95,6 @@ Resources:
               with open('/tmp/'+csv_name, 'w', newline='') as csvfile:
                   filewriter = csv.writer(csvfile, delimiter= ',', quoting= csv.QUOTE_NONE)
                   filewriter.writerow(('account name', 'account ID', 'status'))
-
                   filewriter.writerows(tableData)
               
               
