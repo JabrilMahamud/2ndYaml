@@ -15,14 +15,14 @@ Resources:
             - logs:CreateLogStream
             - logs:PutLogEvents
           Resources:
-            - arn:aws:logs:eu-west-2:251045990954:*
+            - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${LambdaFunctionName}:*
         - Sid: DynamDBAccess
           Effect: Allow
           Action:
             - dynamodb:scan
             - dynamodb:list
           Resource: 
-            - arn:aws:dynamodb:eu-west-2:251045990954:table/MetadataJson
+            - !Sub arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/MetadataJson
         - Sid: S3Access
           Effect: Allow
           Action:
@@ -32,8 +32,8 @@ Resources:
             - s3:PutObjectAcl
             - s3:GetBucketLocation
           Resource: 
-          - arn:s3:::dbmetadata
-          - arn:s3:::dbmetadata/*
+          - !Sub arn:${AWS::Partition}:s3:::dbmetadata
+          - !Sub arn:${AWS::Partition}:s3:::dbmetadata/*
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
