@@ -12,17 +12,17 @@ Resources:
         - Sid: CWAccess
           Effect: Allow
           Action:
-          - logs:CreateLogStream
-          - logs:PutLogEvents
+            - logs:CreateLogStream
+            - logs:PutLogEvents
           Resources:
-            - !Sub '*'
+            - arn:aws:logs:eu-west-2:251045990954:*
         - Sid: DynamDBAccess
           Effect: Allow
           Action:
             - dynamodb:scan
             - dynamodb:list
           Resource: 
-            - !Sub arn:aws:dynamodb:eu-west-2:251045990954:table/MetadataJson
+            - arn:aws:dynamodb:eu-west-2:251045990954:table/MetadataJson
         - Sid: S3Access
           Effect: Allow
           Action:
@@ -32,8 +32,8 @@ Resources:
             - s3:PutObjectAcl
             - s3:GetBucketLocation
           Resource: 
-          - !Sub arn:s3:::dbmetadata
-          - !Sub arn:s3:::dbmetadata/*
+          - arn:s3:::dbmetadata
+          - arn:s3:::dbmetadata/*
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
